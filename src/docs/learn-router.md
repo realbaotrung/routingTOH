@@ -40,3 +40,47 @@ You have defined 2 routes: `/crisis-center` and `/heroes`. Any other URL causes 
 - Set the router to compose HTML5 browser URLs.
 - handle invalid routes with a `wildcard` route.
 - Navigate to the default route when the application launches with an empty path.
+
+## Milestone 2: Routing module
+
+Routing Module has several characteristics:
+
+- Separates routing concerns from other application concerns.
+- Provides a module to replace or remove when testing the application.
+- Provides a well-known location for routing service providers such as guards and resolvers.
+- Does not declare components.
+
+### Integrate routing with your app
+
+With `--routing` option, you can create a project that does use routing.
+
+```shell
+ng generate module app-routing --module app --flat
+```
+
+To create an `AppRoutingModule` module in the `/app` folder to contain the routing configuration.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
