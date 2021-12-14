@@ -1,27 +1,24 @@
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
-import {FormsModule} from "@angular/forms";
-import {AppRoutingModule} from './app-routing.module';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { AppRoutingModule } from './app-routing.module';
+import { HeroesModule } from './heroes/heroes.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import {AppComponent} from './app.component';
-import {CrisisListComponent} from './crisis-list/crisis-list.component';
-import {HeroListComponent} from './hero-list/hero-list.component';
+import { AppComponent } from './app.component';
+import { CrisisListComponent } from './crisis-list/crisis-list.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        CrisisListComponent,
-        HeroListComponent,
-        PageNotFoundComponent
-    ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         FormsModule,
-        AppRoutingModule
+        HeroesModule, // the order is very important!!!
+        AppRoutingModule,
     ],
+    declarations: [AppComponent, CrisisListComponent, PageNotFoundComponent],
     providers: [],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule {}
