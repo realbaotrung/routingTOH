@@ -13,7 +13,7 @@
 -   Lazy loading an `NgModule`.
 -   The `CanLoad` guard (check before loading feature module assets).
 
-## Milestone 1 : getting started
+## Milestone 1 : Getting started
 
 ### Add the Router Outlet
 
@@ -23,7 +23,8 @@
 
 ### Define a Wildcard route
 
-You have defined 2 routes: `/crisis-center` and `/heroes`. Any other URL causes the router to throw an error and crash the app.
+You have defined 2 routes: `/crisis-center` and `/heroes`. Any other URL causes the router to throw an error and crash
+the app.
 
 **Error occurs when routerLink does not exist.**
 
@@ -72,7 +73,8 @@ This milestone covers the following:
 
 ### Add heroes functionality
 
-To manage the heroes, create a `HeroesModule` with routing in the heroes folder and register it with the root `AppModule`
+To manage the heroes, create a `HeroesModule` with routing in the heroes folder and register it with the
+root `AppModule`
 
 ```shell
 ng generate module heroes/heroes --module app --flat --routing
@@ -103,7 +105,9 @@ imports: [
 ],
 ```
 
-When all routes were in one `AppRoutingModule`, you put the default and `wildcard routes` last, after the `/heroes` route, so that the router had a chance to match a URL to the `/heroes` route before hitting the wildcard route and navigating to **"Page not found"**.
+When all routes were in one `AppRoutingModule`, you put the default and `wildcard routes` last, after the `/heroes`
+route, so that the router had a chance to match a URL to the `/heroes` route before hitting the wildcard route and
+navigating to **"Page not found"**.
 
 ### Route Parameters
 
@@ -112,7 +116,8 @@ When all routes were in one `AppRoutingModule`, you put the default and `wildcar
 { path: 'hero/:id', component: HeroDetailComponent }
 ```
 
-The `:id` token creates a slot in the path for a Route Parameter. In this case, this configuration causes the router to **insert the id of a hero into that slot**.
+The `:id` token creates a slot in the path for a Route Parameter. In this case, this configuration causes the router
+to **insert the id of a hero into that slot**.
 
 ```shell
 localhost:4200/hero/15
@@ -130,7 +135,8 @@ link parameter `[routerLink]` has 2 items:
 -   routing path: `'/hero'`
 -   route parameter: `hero.id`
 
-for example: we have `localhost:4200/hero/15`, the router extracts the route parameter `id: 15` from the URL and supplies it to the `HeroDetailComponent` using the `ActivatedRoute` service
+for example: we have `localhost:4200/hero/15`, the router extracts the route parameter `id: 15` from the URL and
+supplies it to the `HeroDetailComponent` using the `ActivatedRoute` service
 
 ### Activated Route in action
 
@@ -157,7 +163,8 @@ ngOnInit() {
 }
 ```
 
-`ngOnInit()` use the `ActivateRoute` service to retrieve route parameter, pull hero `id` from the parameters, and retrieve the hero to display
+`ngOnInit()` use the `ActivateRoute` service to retrieve route parameter, pull hero `id` from the parameters, and
+retrieve the hero to display
 
 -   when the map changes, `paramMap` get `id` parameter from the changed parameters.
 -   then tell `HeroSerice` to fetch hero with that `id` and return the result of `HeroService` request.
@@ -167,8 +174,11 @@ ngOnInit() {
 
 We have 2 things:
 
--   `ActivatedRoute.paramMap` and component reuse (here is `HeroDetailComponent`), the router re-uses a component instance when it re-navigates to the same component. The route parameters could change each time.
--   `ActivatedRoute.snapshot` won't reuse component, the router creates a new `HeroDetailComponent` instance each time. There is no way to navigate from one hero detail to another hero detail without visiting the list component in between.
+-   `ActivatedRoute.paramMap` and component reuse (here is `HeroDetailComponent`), the router re-uses a component instance
+    when it re-navigates to the same component. The route parameters could change each time.
+-   `ActivatedRoute.snapshot` won't reuse component, the router creates a new `HeroDetailComponent` instance each time.
+    There is no way to navigate from one hero detail to another hero detail without visiting the list component in
+    between.
 
 ```shell
 # src/app/heroes/hero-detail/hero-detail.component.ts
@@ -260,3 +270,118 @@ This section covered the following:
 -   Passing information along in route parameters and subscribe to them in the component.
 -   Importing the feature area NgModule into the AppModule.
 -   Applying routable animations based on the page.
+
+## Milestone 4: Crisis center feature
+
+### A crisis center with child routes
+
+Recommended pattern for Angular applications:
+
+-   Each feature area resides in its own folder.
+-   Each feature has its own Angular feature module.
+-   Each area has its own area root component.
+-   Each area root component has its own router outlet and child routes.
+-   Feature area routes rarely cross with routes of other features.
+
+### Child routing component
+
+### Child route configuration
+
+```shell
+# src/app/crisis-center/crisis-center-routing.module.ts
+const crisisCenterRoutes: Routes = [
+  {
+    path: 'crisis-center',
+    component: CrisisCenterComponent,
+    children: [
+      {
+        path: '',
+        component: CrisisListComponent,
+        children: [
+          {
+            path: ':id',
+            component: CrisisDetailComponent
+          },
+          {
+            path: '',
+            component: CrisisCenterHomeComponent
+          }
+        ]
+      }
+    ]
+  }
+];
+```
+
+### Navigate to crisis list with a relative URL
+
+```shell
+# crisis-detail.component.ts
+
+gotoCrises() {
+    const crisisId = this.crisis ? this.crisis.id : null;
+    # Pass along the crisis id if available
+    # so that the CrisisListComponent can select that crisis.
+    # Add a totally useless `foo` parameter for kicks.
+    # Relative navigation back to the crises
+
+    # if the current `id: 3`, the resulting path back to the CrisisList is
+    # `/crisis-center/;id=3;foo=foo`
+
+    # with `relativeTo: this.route`, the router then calculates the target URL
+    # based on the active route's location.
+
+    this.router.navigate(['../', { id: crisisId, foo: 'foo' }], { relativeTo: this.route });
+}
+```
+
+### Displaying multiple routes in named outlets
+
+```shell
+# src/app/app.component.html
+<div [@routeAnimation]="getAnimationData(routerOutlet)">
+  <router-outlet #routerOutlet="outlet"></router-outlet>
+</div>
+<router-outlet name="popup"></router-outlet> # Secondary routes
+```
+
+#### Secondary routes
+
+Secondary routes differ Primary routes in a few key respects:
+
+-   They are independent of each other.
+-   They work in combination with other routes.
+-   They are displayed in named outlets.
+
+```shell
+ng generate component compose-message
+```
+
+Update `compose-message.component`
+
+Notice:
+
+```shell
+# compose-message.component.ts
+ send() {
+    this.sending = true;
+    this.details = 'Sending Message...';
+    setTimeout(() => {
+      this.sending = false;
+      this.closePopup();
+    }, 1000);
+  }
+
+  closePopup() {
+    this.router.navigate([{ outlets: { popup: null }}]);
+  }
+```
+
+-   `send()` simulates latency by waiting one second before "sending" the message and closing the popup.
+-   `closePopup()` closes the popup view by navigating to the popup outlet with a `null`
+
+#### Add a secondary route
+
+Update `AppRoutingModule`
+
+![angular](img/pic3.png)

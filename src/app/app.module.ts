@@ -6,18 +6,20 @@ import { HeroesModule } from './heroes/heroes.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
-import { CrisisListComponent } from './crisis-list/crisis-list.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { ComposeMessageComponent } from './compose-message/compose-message.component';
+import { CrisisCenterModule } from './crisis-center/crisis-center.module';
 
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
+        CrisisCenterModule,
         HeroesModule, // the order is very important!!!
         AppRoutingModule,
     ],
-    declarations: [AppComponent, CrisisListComponent, PageNotFoundComponent],
+    declarations: [AppComponent, PageNotFoundComponent, ComposeMessageComponent],
     providers: [],
     bootstrap: [AppComponent],
 })
