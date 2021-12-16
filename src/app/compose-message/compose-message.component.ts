@@ -27,7 +27,7 @@ export class ComposeMessageComponent {
         this.closePopup();
     }
 
-    closePopup() {
+    private closePopup() {
         // Providing a `null` value to the named outlet
         // clears the contents of the named outlet
         this.router.navigate([{ outlets: { popup: null } }]);

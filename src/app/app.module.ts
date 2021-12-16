@@ -9,14 +9,18 @@ import { AppComponent } from './app.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ComposeMessageComponent } from './compose-message/compose-message.component';
 import { CrisisCenterModule } from './crisis-center/crisis-center.module';
+import { AdminModule } from './admin/admin.module';
+import { AuthModule } from './auth/auth.module';
 
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
-        CrisisCenterModule,
         HeroesModule, // the order is very important!!!
+        CrisisCenterModule,
+        AdminModule,
+        AuthModule,
         AppRoutingModule,
     ],
     declarations: [AppComponent, PageNotFoundComponent, ComposeMessageComponent],

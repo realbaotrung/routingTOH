@@ -15,7 +15,7 @@ export class DialogService {
      * Returns observable resolving to `true`=confirm or `false`=cancel
      */
     confirm(message?: string): Observable<boolean> {
-        const confirmation = window.confirm(message || 'Is it OK?');
+        const confirmation: boolean = window.confirm(message || 'Is it OK?');
 
         return of(confirmation);
     }

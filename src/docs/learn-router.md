@@ -385,3 +385,276 @@ Notice:
 Update `AppRoutingModule`
 
 ![angular](img/pic3.png)
+
+## Milestone 5: Route guards
+
+Any user can navigate anywhere in the application any time, but sometimes you need to control access to different parts of you application for various reason:
+
+-   Perhaps the user is not authorized to navigate to the target component.
+-   Maybe the user must log in (authenticate) first.
+-   Maybe you should fetch some data before you display the target component.
+-   You might want to save pending changes before leaving a component.
+-   You might ask the user if it's OK to discard pending changes rather than save them.
+
+You add guards to the route configuration to handle these scenarios.
+
+A guard's return value controls the router's behaviour:
+
+-   if return `true`, the navigation process continues.
+-   if return `false`, the navigation process stops and the user stays put.
+-   if return `UrlTree`, the current navigation cancels, and a new navigations is initiated to the `UrlTree` returned.
+
+The guard might return its boolean answer synchronously. But in many cases, These are all asynchronous operations.
+
+A Routing guard can return an `Observable<boolean>` and the router will wait for the observable to resolve to `true` or `false`.
+
+> Note: the observable provided to the `Router` must also complete. if the observable does not complete, the navigation does not continue.
+
+The router supports multiple guard interfaces:
+
+-   `CanActivate` to mediate navigation to a route.
+-   `CanActivateChild` to mediate navigation to a child route.
+-   `CanDeactivate` to mediate navigation away from the current route.
+-   `Resolve` to perform route data retrieval before route activation.
+-   `CanLoad` to mediate navigation to a feature module loaded asynchronously.
+
+You can have multiple guards at every level of a routing hierarchy:
+
+-   The router checks the `CanDeactivate` guards first, from **the deepest child route to the top**.
+-   Then it checks the `CanActivate` and `CanActivateChild` guards, from **the top down to the deepest child route**.
+-   If the feature module is loaded asynchronously, the `CanLoad` guard is checked before the module is loaded.
+-   If any guard returns false, pending guards that have not completed are canceled, and the entire navigation is canceled.
+
+### CanActivate: requiring authentication
+
+You could permit access only to authenticated users or to users with a specific role. You might block or limit access until the user's account is activated.
+
+#### Add an admin feature module
+
+```shell
+ng generate module admin --routing
+
+ng generate component admin/admin-dashboard
+
+ng generate component admin/admin
+
+ng generate component admin/manage-crises
+
+ng generate component admin/manage-heroes
+```
+
+#### Component-less route: grouping routes without a component
+
+```shell
+ path: 'admin',
+    component: AdminComponent,
+    children: [
+      {
+        path: '',
+        children: [
+          { path: 'crises', component: ManageCrisesComponent },
+          { path: 'heroes', component: ManageHeroesComponent },
+          { path: '', component: AdminDashboardComponent }
+        ]
+      }
+    ]
+  }
+```
+
+The child route under the `AdminComponent` has a path and a children property, but it's not using a component. This defines a **component-less route**.
+
+#### Guard the admin feature
+
+-   The new admin feature should be accessible only to authenticated users.
+-   Write a `canActivate()` guard method to redirect anonymous users to the login page, when they try to enter the admin area.
+
+```shell
+ng generate guard auth/auth
+```
+
+Update `auth/auth.guard.ts`
+
+Update `admin/admin-routing.module.ts`
+
+#### Authenticate with AuthGuard
+
+The `AuthGuard` should call an application service that can log in a user, and retain information about the current user.
+
+```shell
+ng generate service auth/auth
+```
+
+Update `auth/auth.service.ts`
+
+```ts
+import { Injectable } from '@angular/core';
+
+import { Observable, of } from 'rxjs';
+import { tap, delay } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthService {
+  isLoggedIn = false;
+
+  // store the URL so we can redirect after logging in
+  redirectUrl: string | null = null;
+
+  login(): Observable<boolean> {
+    return of(true).pipe(
+      delay(1000),
+      tap(() => this.isLoggedIn = true)
+    );
+  }
+
+  logout(): void {
+    this.isLoggedIn = false;
+  }
+}
+```
+
+-   `isLogggedIn` flag tell you whether the user is authenticated.
+-   Its `login()` method simulates an API call to an external service.
+-   The `redirectUrl` property stores the URL that the user wanted to access, so you can navigate to it after authentication.
+
+Revise the `AuthGuard` to call `AuthService`
+
+-   This guard returns a synchronous boolean result. If the user is logged in, it returns true and the navigation continues.
+-   If the user is not logged in, you store the attempted URL the user came from using the `RouterStateSnapshot.url` and tell the router to redirect to a login page.
+-   Returning a `UrlTree` tells the `Router` to cancel the current navigation and schedule a new one to redirect the user.
+
+#### Add the LoginComponent
+
+```shell
+ng generate component auth/login
+
+ng generate module auth/auth --routing
+```
+
+Update `app.module.ts`
+Update `auth.module.ts`
+Update `login.component`
+
+### CanActivateChild: guarding child routes
+
+`CanActivateChild` differs from `CanActivate` is that it runs before any child route is activated.
+
+Update `auth.guard.ts` that implements `canActivateChild()`
+
+```shell
+# auth.guard.ts
+canActivateChild(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+    ): Observable<boolean|UrlTree> | # for async checks
+       Promise<boolean|UrlTree> |    # for async checks
+       boolean | UrlTree { }         # for sync  checks
+
+    # return true    : to let the user access the admin feature module
+    # return UrlTree : to redirect the user to the login page instead
+```
+
+Update `admin-routing.module.ts`
+
+```shell
+# admin-routing.module.ts
+    path: '',
+    canActivateChild: [AuthGuard],
+    children: [
+        { path: 'crises', component: ManageCrisesComponent },
+        { path: 'heroes', component: ManageHeroesComponent },
+        { path: '', component: AdminDashboardComponent },
+    ],
+```
+
+### CanDeactivate: handling unsaved changes
+
+#### Cancel and Save
+
+update `crisis-detail.component.ts` with `save()` and `cancel()` method
+
+Generate a `Dialog` service to handle user confirmation
+
+```shell
+ng generate service dialog
+```
+
+update `dialog.service.ts`
+
+Generate a guard that checks for the presence of a `canDeactivate()` method in a component (or any component)
+
+```shell
+ng generate guard can-deactivate # with options: canDeactivate
+```
+
+update `can-deactivate.guard.ts` with `canDeactivate()` method
+
+update `crisis-detail.component.ts` with `canDeactivate()` method
+
+Add the Guard to the **crisis detail route** in `crisis-center-routing.module.ts`, using `canDeactivate` array property
+
+### Resolve: pre-fetching component data
+
+If you were using a real world API, there might be some delay before the data to display is returned from the server. **You don't want to display a blank component while waiting for the data.**
+
+To improve this behavior, you can pre-fetch data from the server using a resolver, so it's ready the moment the route is activated. In summary, you want to delay rendering the routed until all necessary data has been fetched.
+
+#### Fetching data before navigating
+
+```shell
+ng generate service crisis-center/crisis-detail-resolver
+```
+
+update `crisis-center/crisis-detail-resolver.ts`
+
+The `CrisisService.getCrisis()` method returns an observable in order to prevent the route from loading until the data is fetched. The Router guards require an observable to complete, You use the `take(1)` operator ensure that the **Observable completes after retrieving the first value from the Observable returned by the `getCrisis()` method.**
+
+update `crisis-center/crisis-center-routing.module.ts`
+
+```shell
+# crisis-center/crisis-center-routing.module.ts
+    path: '',
+    component: CrisisListComponent,
+    children: [
+        {
+            path: ':id',
+            component: CrisisDetailComponent,
+            canDeactivate: [CanDeactivateGuard],
+            resolve: {
+                crisis: CrisisDetailResolverService
+            }
+        },
+        { path: '', component: CrisisCenterHomeComponent },
+    ],
+```
+
+`CrisisDetailComponent` should no longer fetch the crisis. when you re-configured the route, you changed where the crisis is.
+
+Update `CrisisDetailComponent` to get the crisis from the `ActivatedRoute.data.crisis` property instead:
+
+```shell
+# src/app/crisis-center/crisis-detail/crisis-detail.component.ts
+    ngOnInit() {
+        this.route.data.subscribe(data => {
+            const crisis: Crisis = data['crisis'];
+            this.editName = crisis.name;
+            this.crisis = crisis;
+        });
+    }
+```
+
+Note the following three important points:
+
+1. The router's `Resolve` interface is optional. The `CrisisDetailResolverService` doesn't inherit from a base class. The router looks for that method and calls it if found.
+
+2. The router calls the resolver in any case where the user could navigate away, so you don't have to code for each use case.
+
+3. Returning an EMPTY `Observable` in at least one resolver cancels navigation.
+
+### Query parameters and fragments
+
+[Fragment](https://en.wikipedia.org/wiki/URI_fragment)
+[Fragment](https://angular.io/guide/router-tutorial-toh#query-parameters-and-fragments)
+
+Page such as: `http://www.example.org/foo.html#bar` the fragment refers to the element with `id="bar"`
