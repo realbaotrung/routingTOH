@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 
 @Component({
     selector: 'app-login',
@@ -31,8 +31,14 @@ export class LoginComponent implements OnInit {
                 // However, to keep the example simple, we will always redirect to `/admin`
                 const redirectUrl = '/admin';
 
+                // Set our navigation extras object
+                // that passes on our global query params and fragment
+                const navigationExtra: NavigationExtras = {
+                    queryParamsHandling: 'preserve',
+                    preserveFragment: true,
+                };
                 // Redirect the user
-                this.router.navigate([redirectUrl]);
+                this.router.navigate([redirectUrl], navigationExtra);
             }
         });
     }

@@ -805,3 +805,27 @@ Update `AdminDashboardComponent` to inject `SelectivePreloadingStrategyService`
 #### Changing `/heroes` to `/superheroes`
 
 This sections guides you through migrating the `Hero` routes to new URLs.
+
+redirect `/heroes` to /superheroes and `/hero:id` to `/superhero:id`
+
+update `heroes-routing.module.ts`
+
+redirect empty path `/superheroes` at `app-routing.module.ts`
+
+update `app.component.html`
+
+update `hero-detail.component.ts`
+
+### Inspect the router's configuration
+
+```ts
+export class AppModule {
+  // Diagnostic only: inspect router configuration
+  constructor(router: Router) {
+    // Use a custom replacer to display function names in the route configs
+    const replacer = (key, value) => (typeof value === 'function') ? value.name : value;
+
+    console.log('Routes: ', JSON.stringify(router.config, replacer, 2));
+  }
+}
+```
