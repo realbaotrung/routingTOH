@@ -37,15 +37,15 @@ export class CrisisDetailComponent implements OnInit {
         this.gotoCrises();
     }
 
-    canDeactivate(): Observable<boolean> | boolean {
-        // Allow synchronous navigation (`true`) if no crisis or the crisis is unchanged
-        if (!this.crisis || this.crisis.name === this.editName) {
-            return true;
-        }
-        // Otherwise ask the user with the dialog service and return its
-        // observable which resolves to true or false when the user decides
-        return this.dialogService.confirm('Discard changes?');
-    }
+    // canDeactivate(): Observable<boolean> | boolean {
+    //     // Allow synchronous navigation (`true`) if no crisis or the crisis is unchanged
+    //     if (!this.crisis || this.crisis.name === this.editName) {
+    //         return true;
+    //     }
+    //     // Otherwise ask the user with the dialog service and return its
+    //     // observable which resolves to true or false when the user decides
+    //     return this.dialogService.confirm('Discard changes?');
+    // }
 
     gotoCrises() {
         const crisisId = this.crisis ? this.crisis.id : null;

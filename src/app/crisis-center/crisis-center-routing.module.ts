@@ -5,7 +5,7 @@ import { CrisisCenterHomeComponent } from './crisis-center-home/crisis-center-ho
 import { CrisisListComponent } from './crisis-list/crisis-list.component';
 import { CrisisCenterComponent } from './crisis-center.component';
 import { CrisisDetailComponent } from './crisis-detail/crisis-detail.component';
-import { CanDeactivateGuard } from '../can-deactivate.guard';
+import { CrisisDeactivateGuard } from './crisis-deactivate.guard';
 import { CrisisDetailResolverService } from './crisis-detail-resolver.service';
 
 const crisisCenterRoutes: Routes = [
@@ -20,7 +20,7 @@ const crisisCenterRoutes: Routes = [
                     {
                         path: ':id',
                         component: CrisisDetailComponent,
-                        canDeactivate: [CanDeactivateGuard], // === Guard here ===
+                        canDeactivate: [CrisisDeactivateGuard], // === Guard here ===
                         resolve: {
                             // === Pre-fetch component data ===
                             crisis: CrisisDetailResolverService,

@@ -585,10 +585,10 @@ update `dialog.service.ts`
 Generate a guard that checks for the presence of a `canDeactivate()` method in a component (or any component)
 
 ```shell
-ng generate guard can-deactivate # with options: canDeactivate
+ng generate guard crisis-center/crisis-deactivate # with options: canDeactivate
 ```
 
-update `can-deactivate.guard.ts` with `canDeactivate()` method
+update `crisis-deactivate.guard.ts` with `canDeactivate()` method
 
 update `crisis-detail.component.ts` with `canDeactivate()` method
 
@@ -654,7 +654,86 @@ Note the following three important points:
 
 ### Query parameters and fragments
 
-[Fragment](https://en.wikipedia.org/wiki/URI_fragment)
-[Fragment](https://angular.io/guide/router-tutorial-toh#query-parameters-and-fragments)
+[Fragment Wiki](https://en.wikipedia.org/wiki/URI_fragment)
+[Fragment angular](https://angular.io/guide/router-tutorial-toh#query-parameters-and-fragments)
 
 Page such as: `http://www.example.org/foo.html#bar` the fragment refers to the element with `id="bar"`
+
+## Milestone 6: Asynchronous routing
+
+At some point you'll reach a point where the application takes a long time to load. To remedy this issue, **use asynchronous routing, which loads feature modules lazily, on request**.
+
+Lazy loading has multiple benefits:
+
+-   You can load feature areas only when requested by the use.
+-   You can speed up load time for users that only visit certain areas of the application.
+-   You can continue expanding lazy loaded feature areas without increasing the size of the initial load bundle.
+
+By organizing the application into modules - `AppModule`, `HeroesModule`, `AdminModule`, `CrisisCenterModule` - you have natural candidates for lazy loading.
+
+`AppModule` must be loaded from the start. But other (can and should) be lay loaded. the `AdminModule`, for example, is needed by a few authorized user, so you should only load it when requested by the right people.
+
+### Lazy Loading route configuration
+
+update `admin-routing.module.ts`
+
+```shell
+const adminRoutes: Routes = [
+    {
+        path: '',
+        component: AdminComponent,
+        canActivate: [AuthGuard], // Add the Route Guard here
+        children: [
+```
+
+Use empty path routes (path: '') to group routes together without adding any additional path segments to the URL.
+
+update `app-routing.module.ts`
+
+```shell
+const appRoutes: Routes = [
+    { path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) },
+```
+
+-   `loadChildren` property takes a function that return a promise, using the browser's build-in syntax for lazy loading code, using dynamic import `import('...')`
+
+-   After the code is requested and loaded, the `Promise` resolves an object that contains the `NgModule`, in this case the `AdminModule`
+
+Remove `AdminModule` at `import` and `NgModule` in `app.module.ts`
+
+### CanLoad: guarding unauthorized loading of feature modules
+
+You're already protecting the `AdminModule` with a `CanActivate` guard that prevents unauthorized users from accessing the admin feature area. it redirects to the login page if the user is not authorized.
+
+But the router is still loading the `AdminModule` even if the user can't visit any of its components. Ideally, you'd only load the `AdminModule` if the user is logged in.
+
+`CanLoad` guard that only loads the `AdminModule` once the user is logged in and attempts to access the admin feature area.
+
+Update `auth.guard.ts`
+
+```shell
+    canLoad( route: Route,
+    ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+        const url = `/${route.path}`;
+        return this.checkLogin(url);
+    }
+```
+
+checkLogin(url) inside canLoad() redirects to that URL once the user has logged in.
+
+update `app-routing.module.ts`
+
+### Preloading: background loading of feature areas
+
+[PreLoading](https://angular.io/guide/router-tutorial-toh#preloading-background-loading-of-feature-areas)
+
+#### How preloading works
+
+The Router offer two preloading strategies:
+
+-   No preloading, which is the default. Lazy loaded feature areas are still loaded on-demand.
+-   Preloading of all lazy loaded feature areas.
+
+The router either never preloads, or preloads every lazy loaded module. The Router also supports `custom preloading strategies` for fine control over which modules to preload and when.
+
+#### Lazy load the crisis center
