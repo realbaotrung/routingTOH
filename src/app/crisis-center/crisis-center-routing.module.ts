@@ -1,16 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
-import { CrisisCenterHomeComponent } from './crisis-center-home/crisis-center-home.component';
-import { CrisisListComponent } from './crisis-list/crisis-list.component';
-import { CrisisCenterComponent } from './crisis-center.component';
-import { CrisisDetailComponent } from './crisis-detail/crisis-detail.component';
+import {
+    CrisisCenterHomeComponent,
+    CrisisCenterComponent,
+    CrisisDetailComponent,
+    CrisisListComponent,
+} from './index';
 import { CrisisDeactivateGuard } from './crisis-deactivate.guard';
 import { CrisisDetailResolverService } from './crisis-detail-resolver.service';
 
 const crisisCenterRoutes: Routes = [
     {
-        path: 'crisis-center',
+        path: '',
         component: CrisisCenterComponent,
         children: [
             {

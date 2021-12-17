@@ -737,3 +737,71 @@ The Router offer two preloading strategies:
 The router either never preloads, or preloads every lazy loaded module. The Router also supports `custom preloading strategies` for fine control over which modules to preload and when.
 
 #### Lazy load the crisis center
+
+Update `app.module.ts`
+
+Update `app-routing.module.ts`
+
+Update `crisis-center-routing-module.ts`
+
+![Preloading](img/pic4.png)
+
+![Preloading](img/pic5.png)
+
+To enable preloading of all lazy loaded modules, import `PreloadAllModules` token from Angular router package.
+
+Update `app-routing.module.ts`
+
+```shell
+# Update `app-routing.module.ts`
+@NgModule({
+    imports: [
+        RouterModule.forRoot(
+            appRoutes,
+            {
+                enableTracing: true,
+                preloadingStrategy: PreloadAllModules
+            },
+        ),
+    ],
+    exports: [RouterModule],
+})
+```
+
+This configures the `Router` preloader to immediately load all lazy loaded routes (routes with a `loadChildren` property).
+
+When you visit `http://localhost:4200`, the `/heroes` route loads immediately upon launch and the router starts loading the `CrisisCenterModule` right after the `HeroesModule` loads.
+
+Currently, the `AdminModule` does not preload because `CanLoad` is blocking it.
+
+#### CanLoad blocks preload
+
+The `PreloadAllModules ` strategy does not load feature areas protected by a `CanLoad` guard.
+
+### Custom Preloading Strategy
+
+Preloading every lazy loaded module works well in many situations. However, in consideration of things such as **low bandwidth and user metrics**, you can use a custom preloading strategy for specific feature modules.
+
+update `app-routing.module.ts`
+
+```shell
+ng generate service selective-preloading-strategy
+```
+
+update `selective-preloading-strategy.service.ts`
+
+`SelectivePreloadingStrategyService` implements the `PreloadingStrategy`, which has `preload()` method.
+
+![Preloading](img/pic6.png)
+
+An implementation of preload must return an Observable. If the route does preload, it returns the observable returned by calling the loader function. If the route does not preload, it returns an Observable of null.
+
+In this sample, the `preload()` method loads the route if the route's `data.preload` flag is truthy.
+
+Update `AdminDashboardComponent` to inject `SelectivePreloadingStrategyService`
+
+### Migrating URLs with redirects
+
+#### Changing `/heroes` to `/superheroes`
+
+This sections guides you through migrating the `Hero` routes to new URLs.

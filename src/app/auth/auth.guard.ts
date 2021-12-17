@@ -26,20 +26,6 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
         return this.checkLogin(url);
     }
 
-    private checkLogin(url: string): Observable<boolean | UrlTree> | boolean | UrlTree {
-        if (this.authService.isLoggedIn) {
-            return true;
-        }
-
-        // Store the attempted URL for redirecting
-        this.authService.redirectUrl = url;
-
-        // Redirect to the login page
-        // return an UrlTree, tell Router to cancel the current navigation and
-        // schedule a new one ('login' page) to redirect the user
-        return this.router.parseUrl('/login');
-    }
-
     canActivateChild(
         childRoute: ActivatedRouteSnapshot,
         state: RouterStateSnapshot,
@@ -52,5 +38,19 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
     ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
         const url = `/${route.path}`;
         return this.checkLogin(url);
+    }
+
+    private checkLogin(url: string): Observable<boolean | UrlTree> | boolean | UrlTree {
+        if (this.authService.isLoggedIn) {
+            return true;
+        }
+
+        // Store the attempted URL for redirecting
+        this.authService.redirectUrl = url;
+
+        // Redirect to the login page
+        // return an UrlTree, tell Router to cancel the current navigation and
+        // schedule a new one ('login' page) to redirect the user
+        return this.router.parseUrl('/login');
     }
 }

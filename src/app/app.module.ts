@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { HeroesModule } from './heroes/heroes.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { CrisisCenterModule } from './crisis-center/crisis-center.module';
 import { AuthModule } from './auth/auth.module';
 
 import { AppComponent } from './app.component';
@@ -16,6 +15,7 @@ import { DialogService } from './dialog.service';
 import { CrisisService } from './crisis-center/crisis.service';
 import { AuthService } from './auth/auth.service';
 import { CrisisDetailResolverService } from './crisis-center/crisis-detail-resolver.service';
+import { SelectivePreloadingStrategyService } from './selective-preloading-strategy.service';
 
 @NgModule({
     imports: [
@@ -23,7 +23,6 @@ import { CrisisDetailResolverService } from './crisis-center/crisis-detail-resol
         BrowserAnimationsModule,
         FormsModule,
         HeroesModule, // the order is very important!!!
-        CrisisCenterModule,
         AuthModule,
         AppRoutingModule,
     ],
@@ -35,6 +34,7 @@ import { CrisisDetailResolverService } from './crisis-center/crisis-detail-resol
         DialogService,
         AuthService,
         CrisisDetailResolverService,
+        SelectivePreloadingStrategyService,
     ],
     bootstrap: [AppComponent],
 })

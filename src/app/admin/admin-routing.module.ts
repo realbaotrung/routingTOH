@@ -1,9 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AdminComponent } from './admin/admin.component';
-import { ManageCrisesComponent } from './manage-crises/manage-crises.component';
-import { ManageHeroesComponent } from './manage-heroes/manage-heroes.component';
-import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import {
+    AdminComponent,
+    ManageHeroesComponent,
+    ManageCrisesComponent,
+    AdminDashboardComponent,
+} from './index';
 import { AuthGuard } from '../auth/auth.guard';
 
 const adminRoutes: Routes = [
